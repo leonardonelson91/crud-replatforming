@@ -22,6 +22,10 @@
 
         <default-action-ref name="index"/>
 
+        <action name="">
+            <result>/WEB-INF/index.jsp</result>
+        </action>
+
         <action name="index" class="org.apache.struts.crud.action.PersonAction" method="list">
             <result name="success">/WEB-INF/jsp/persons.jsp</result>
             <interceptor-ref name="basicStack"/>
