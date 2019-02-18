@@ -15,3 +15,7 @@ Note that we no longer need to specify the tomee buildpack, as we are now using 
 
 ## Phase 3: Adding JPA and database persistence
 The legacy app was using an in-memory persistence approach. We are adding Spring JPA and Hibernate to persist data into a MySQL database instance.
+
+## Phase 4: Introducing Actuators
+At this point, the app is already running with springboot and persisting data with JPA. Now we add spring boot's actuators,
+to have some application metrics like health, environment and others.
