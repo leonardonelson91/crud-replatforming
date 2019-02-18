@@ -1,11 +1,18 @@
 package org.apache.struts.crud.dao;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts.crud.model.Person;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * In memory data repository for Person objects.
@@ -13,70 +20,67 @@ import org.apache.struts.crud.model.Person;
  * @author bruce phillips
  * @author antonio sanchez
  */
-public class MemoryPersonDao implements PersonDao {
+@Repository
+public class MemoryPersonDao implements PersonDao, ApplicationListener<ApplicationReadyEvent> {
     private static final Logger LOG = LogManager.getLogger(MemoryPersonDao.class.getName());
 
     private final static List<Person> persons;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Autowired
+    PersonSupportDao personSupportDao;
+
     static {
         persons = new ArrayList<>();
-        persons.add(new Person(1, "Bruce", "Phillips", "basketball", "male", MemoryPersonSupportDao.getCountry("US"), true, new String[]{"Ford", "Nissan"}, "bphillips@ku.edu", "123-456-9999"));
-        persons.add(new Person(2, "Antonio", "Sanchez", "mtb", "male", MemoryPersonSupportDao.getCountry("ES"), true, new String[]{"Toyota", "Seat"}, "asanchez@correo-e.es", "555-999-8888"));
     }
 
     @Override
     public Person getPerson(Integer id) {
-        for (Person p : persons) {
-            if (p.getPersonId().equals(id)) {
-                try {
-                    return (Person) p.clone();
-                } catch (CloneNotSupportedException ex) {
-                    LOG.error("Unexpected exception cloning Person");
-                }
-            }
-        }
-        return null;
+        return entityManager.find(Person.class, id);
     }
 
     @Override
     public Person[] getAllPersons() {
-        return persons.toArray(new Person[persons.size()]);
+        List<Person> persons = entityManager.createQuery("from Person").getResultList();
+        Person[] personArr = new Person[persons.size()];
+        return persons.toArray(personArr);
     }
 
+    @Transactional
     @Override
     public void updatePerson(Person person) {
-        Integer id = person.getPersonId();
-        for (int i = 0; i < persons.size(); i++) {
-            Person p = persons.get(i);
-            if (p.getPersonId().equals(id)) {
-                person.setCountry(MemoryPersonSupportDao.getCountry(person.getCountry().getCountryId()));
-                persons.set(i, person);
-                break;
-            }
-        }
+        entityManager.merge(person);
     }
 
+    @Transactional
     @Override
     public void insertPerson(Person person) {
-        int lastId = 0;
-        for (Person p : persons) {
-            if (p.getPersonId() > lastId) {
-                lastId = p.getPersonId();
-            }
-        }
-        person.setPersonId(lastId + 1);
-        person.setCountry(MemoryPersonSupportDao.getCountry(person.getCountry().getCountryId()));
-        persons.add(person);
+        entityManager.persist(person);
     }
 
+    @Transactional
     @Override
     public void deletePerson(Integer id) {
-        for (int i = 0; i < persons.size(); i++) {
-            Person person = persons.get(i);
-            if (person.getPersonId().equals(id)) {
-                persons.remove(i);
-                break;
-            }
+        Person personToRemove = entityManager.find(Person.class, id);
+        if(personToRemove != null) {
+            entityManager.remove(personToRemove);
+        } else {
+            LOG.error("Person to remove couldn't be found.");
         }
+    }
+
+    @Transactional
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+        Person person1 = new Person("Bruce", "Phillips", "basketball",
+                "male", personSupportDao.getCountry("US"),
+                true, new String[]{"Ford", "Nissan"}, "bphillips@ku.edu", "123-456-9999");
+        Person person2 = new Person("Antonio", "Sanchez", "mtb",
+                "male", personSupportDao.getCountry("ES"),
+                true, new String[]{"Toyota", "Seat"}, "asanchez@correo-e.es", "555-999-8888");
+        insertPerson(person1);
+        insertPerson(person2);
     }
 }

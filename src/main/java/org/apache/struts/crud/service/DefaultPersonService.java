@@ -1,11 +1,10 @@
 package org.apache.struts.crud.service;
 
-import org.apache.struts.crud.dao.MemoryPersonDao;
-import org.apache.struts.crud.dao.MemoryPersonSupportDao;
 import org.apache.struts.crud.dao.PersonDao;
 import org.apache.struts.crud.dao.PersonSupportDao;
 import org.apache.struts.crud.model.Country;
 import org.apache.struts.crud.model.Person;
+import org.springframework.stereotype.Service;
 
 /**
  * Implement Services needed to edit and save
@@ -15,13 +14,14 @@ import org.apache.struts.crud.model.Person;
  * @author antonio sanchez
  */
 
+@Service
 public class DefaultPersonService implements PersonService {
-    PersonDao personDao; 
-    PersonSupportDao personSupportDao; 
-    
-    public DefaultPersonService() {
-        personDao = new MemoryPersonDao();
-        personSupportDao = new MemoryPersonSupportDao();
+    private PersonDao personDao;
+    private PersonSupportDao personSupportDao;
+
+    public DefaultPersonService(PersonDao personDao, PersonSupportDao personSupportDao) {
+        this.personDao = personDao;
+        this.personSupportDao = personSupportDao;
     }
 
     @Override

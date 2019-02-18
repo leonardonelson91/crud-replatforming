@@ -1,19 +1,31 @@
 package org.apache.struts.crud.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import java.io.Serializable;
+import java.util.Collection;
+
 /**
  * Model a country.
  * 
  * @author bruce phillips
  * @author antonio sánchez
  */
-public class Country {
+@Entity
+public class Country implements Serializable {
+    @Id
     private String countryId;
     private String countryName;
+    @OneToMany(mappedBy = "country")
+    private Collection<Person> persons;
 
     public Country(String countryId, String countryName) {
         setCountryId(countryId);
         setCountryName(countryName);
     }
+
+    public Country() {}
 
     public void setCountryId(String countryId) {
         if (countryId == null)

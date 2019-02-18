@@ -19,5 +19,7 @@ public interface PersonSupportDao {
     String[] getSports();
     
     String[] getGenders();
+
+    Country getCountry(String countryId);
     
 }

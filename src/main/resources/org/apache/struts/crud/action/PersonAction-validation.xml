@@ -29,7 +29,7 @@
     </validator>
     <validator type="fieldexpression">
         <param name="fieldname">person.carModels</param>
-        <param name="expression"><![CDATA[person.carModels.length > 0]]></param>
+        <param name="expression"><![CDATA[person.carModels.size > 0]]></param>
         <message>You must select at least one car model.</message>
     </validator>
 </validators>

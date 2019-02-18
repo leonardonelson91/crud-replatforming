@@ -6,8 +6,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts.crud.model.Country;
 import org.apache.struts.crud.model.Person;
-import org.apache.struts.crud.service.DefaultPersonService;
 import org.apache.struts.crud.service.PersonService;
+import org.springframework.stereotype.Component;
 
 /**
  * Acts as a controller to handle actions related to editing a Person.
@@ -15,10 +15,11 @@ import org.apache.struts.crud.service.PersonService;
  * @author bruce phillips
  * @author antonio sánchez
  */
+@Component
 public class PersonAction extends ActionSupport implements Preparable {
     
     private static final Logger LOG = LogManager.getLogger(PersonAction.class.getName());
-    private PersonService personService = new DefaultPersonService();
+    private PersonService personService;
     private Person person;
     private Person[] persons;
     private String[] sports;
@@ -26,14 +27,21 @@ public class PersonAction extends ActionSupport implements Preparable {
     private Country[] countries;
     private String[] carModelsAvailable;
 
+    public PersonAction(PersonService personService) {
+        this.personService = personService;
+    }
+
+    public PersonAction() {
+    }
+
     @Override
     public void prepare() throws Exception {
         carModelsAvailable = personService.getCarModels();
         sports = personService.getSports();
         countries = personService.getCountries();
         genders = personService.getGenders();
-        LOG.info("Prepared support data for Person entity.");        
-        
+        LOG.info("Prepared support data for Person entity.");
+
         if (person != null && person.getPersonId() != null) {
             person = personService.getPerson(person.getPersonId());
             LOG.info("Preparing actual data for Person: " + person);

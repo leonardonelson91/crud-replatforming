@@ -1,6 +1,9 @@
 package org.apache.struts.crud.model;
 
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Models a Person who registers.
@@ -10,15 +13,22 @@ import java.util.Arrays;
  * @author bruce phillips
  * @author antonio sanchez
  */
-public class Person implements Cloneable {
+@Entity
+public class Person implements Cloneable, Serializable {
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer personId;
     private String firstName;
     private String lastName;
     private String sport;
     private String gender;
-    private Country country = new Country("", "");
+    @ManyToOne
+    @JoinColumn(name = "country")
+    private Country country;
     private boolean over21;
-    private String[] carModels;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name ="car_models")
+    private List<String> carModels;
     private String email;
     private String phoneNumber;
     
@@ -26,17 +36,16 @@ public class Person implements Cloneable {
     
     }
     
-    public Person(Integer id, String firstName, String lastName, String sport, 
+    public Person(String firstName, String lastName, String sport,
                 String gender, Country country, boolean over21, String[] carModels, 
                 String email, String phoneNumber) {
-        this.personId = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.sport = sport;
         this.gender = gender;
         this.country = country;
         this.over21 = over21;
-        this.carModels = carModels;
+        this.carModels = Arrays.asList(carModels);
         this.email = email;
         this.phoneNumber = phoneNumber;
     }
@@ -97,14 +106,14 @@ public class Person implements Cloneable {
         return over21;
     }
 
-    public void setCarModels(String[] carModels) {
+    public List<String> getCarModels() {
+        return carModels;
+    }
+
+    public void setCarModels(List<String> carModels) {
         this.carModels = carModels;
     }
 
-    public String[] getCarModels() {
-        return carModels;
-    }
-    
     public void setEmail(String email) {
         this.email = email;
     }
